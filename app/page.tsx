@@ -6,11 +6,18 @@ import { ArrowRight, Ticket, ClipboardList, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function Home() {
-  const role = (await cookies()).get("it_support_role")?.value;
+  const cookieStore = await cookies();
+  const role = cookieStore.get("it_support_role")?.value;
+  const name = cookieStore.get("it_support_name")?.value;
 
   return (
     <main className="container flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] mx-auto px-4 text-center">
       <div className="max-w-3xl space-y-6">
+        {name && (
+          <div className="animate-in fade-in slide-in-from-top-2 duration-700">
+             <span className="text-sm font-bold uppercase tracking-[0.2em] text-primary/60">Welcome back, {name}</span>
+          </div>
+        )}
         <h1 className="text-5xl font-extrabold tracking-tight lg:text-6xl text-primary">
           KSA IT Support <span className="text-muted-foreground">Desk Portal</span>
         </h1>

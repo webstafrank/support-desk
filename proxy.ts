@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const cookie = request.cookies.get("it_support_key")?.value;
   const role = request.cookies.get("it_support_role")?.value;
   const pathname = request.nextUrl.pathname;
@@ -20,7 +20,7 @@ export function middleware(request: NextRequest) {
 
   // Admin access control: Admins ONLY see /admin and home
   if (role === "admin") {
-    if (pathname !== "/admin" && pathname !== "/" && pathname !== "/login") {
+    if (pathname !== "/admin" && pathname !== "/" && pathname !== "/login" && pathname !== "/tickets/waiting") {
        // Optional: Redirect admins back to dashboard if they try to access user-only pages
        if (pathname.startsWith("/tickets/create") || pathname.startsWith("/waitlist")) {
           return NextResponse.redirect(new URL("/admin", request.url));
@@ -28,7 +28,7 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // User access control: Users ONLY see home, tickets/create, and waitlist
+  // User access control: Users ONLY see home, tickets/create, waitlist, and tickets/waiting
   if (role === "user") {
     if (pathname.startsWith("/admin")) {
       return NextResponse.redirect(new URL("/", request.url));

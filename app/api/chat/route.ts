@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { chatStore } from "@/lib/chat-store"
 
 export async function GET() {
-  const messages = chatStore.getMessages();
+  const messages = await chatStore.getMessages();
   return NextResponse.json({ messages })
 }
 
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, message: "Missing sender or text" }, { status: 400 })
   }
   
-  const newMessage = chatStore.addMessage({
+  const newMessage = await chatStore.addMessage({
     sender,
     senderName: senderName || "User",
     text,

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export default function WaitingPage() {
+export default function Page() {
   const [timeLeft, setTimeLeft] = useState<number>(600); // 10 minutes in seconds
 
   useEffect(() => {

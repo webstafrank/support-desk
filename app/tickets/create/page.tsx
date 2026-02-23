@@ -5,7 +5,12 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import TicketForm from "@/components/tickets/TicketForm";
 
-export default function Page() {
+import { cookies } from "next/headers";
+
+export default async function Page() {
+  const cookieStore = await cookies();
+  const userName = cookieStore.get("it_support_name")?.value || "";
+
   return (
     <main className="container flex flex-col items-center">
       <div className="w-full flex justify-between items-center py-4">
@@ -18,7 +23,7 @@ export default function Page() {
         </Link>
         <h1 className="text-2xl font-bold">Create new ticket</h1>
       </div>
-      <TicketForm />
+      <TicketForm defaultName={userName} />
     </main>
   );
 }

@@ -65,27 +65,32 @@ function TicketItem({ ticket }: { ticket: Ticket }) {
   const createdAt = new Date(ticket.createdAt);
 
   return (
-    <Link href={`/tickets/${ticket.id}`} className="block hover:scale-[1.02] transition-transform">
-      <Card className="h-full border-primary/10 bg-gradient-to-br from-card via-card to-primary/5">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium line-clamp-1 mr-2">{ticket.subject}</CardTitle>
+    <div className="block transition-transform">
+      <Card className="h-full border-primary/10 bg-gradient-to-br from-card via-card to-primary/5 shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+          <div className="space-y-1">
+            <CardTitle className="text-lg font-bold text-primary">Ticket #{ticket.id}</CardTitle>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">
+              Queue Position
+            </p>
+          </div>
           <TicketStatus status={ticket.status} />
         </CardHeader>
-        <CardContent>
-          <div className="text-xl font-bold mb-1">{ticket.name}</div>
-          <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px]">
-            {ticket.problemDescription}
-          </p>
-          <div className="flex items-center justify-between mt-4">
-            <p className="text-xs text-muted-foreground">
-              {createdAt.toLocaleDateString()}
-            </p>
-            <Badge variant={ticket.priority === "high" ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0 h-5">
-              {ticket.priority.toUpperCase()}
-            </Badge>
+        <CardContent className="pt-0">
+          <div className="flex items-center justify-between mt-2 pt-3 border-t border-primary/5">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[10px] text-muted-foreground uppercase">Submitted</span>
+              <span className="text-xs font-medium">{createdAt.toLocaleDateString()}</span>
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-[10px] text-muted-foreground uppercase">Priority</span>
+              <Badge variant={ticket.priority === "high" ? "destructive" : "secondary"} className="text-[9px] px-1.5 py-0 h-4 uppercase">
+                {ticket.priority}
+              </Badge>
+            </div>
           </div>
         </CardContent>
       </Card>
-    </Link>
+    </div>
   );
 }

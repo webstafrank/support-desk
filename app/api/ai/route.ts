@@ -22,15 +22,23 @@ export async function POST(request: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      systemInstruction: "You are a helpful IT support assistant for KSA IT Support. Be concise, professional, and friendly. Help the user solve their technical issue. Use the Google Search tool when necessary to provide accurate and up-to-date information.",
+      tools: [
+        {
+          googleSearch: {},
+        },
+      ] as any,
+    });
 
-    const result = await model.generateContent([
-      "You are a helpful IT support assistant for KSA IT Support. Be concise, professional, and friendly. Help the user solve their technical issue.",
-      message
-    ]);
+    const result = await model.generateContent(message);
     const responseText = result.response.text();
 
-    return NextResponse.json({ response: responseText, source: "Gemini 1.5 Flash" });
+    return NextResponse.json({ 
+      response: responseText, 
+      source: "Gemini 1.5 Flash with Google Search" 
+    });
   } catch (error) {
     console.error("AI API Error:", error);
     return NextResponse.json({ error: "Failed to process AI request" }, { status: 500 });

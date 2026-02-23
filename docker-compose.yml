@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ksauser
+      POSTGRES_PASSWORD: ksapassword
+      POSTGRES_DB: ksadb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ksauser -d ksadb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    command: npx prisma db push
+    environment:
+      DATABASE_URL: "postgresql://ksauser:ksapassword@db:5432/ksadb"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://ksauser:ksapassword@db:5432/ksadb"
+      NEXTAUTH_SECRET: "your-secret-here"
+      NEXTAUTH_URL: "http://localhost:3000"
+      GEMINI_API_KEY: "${GEMINI_API_KEY}"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:

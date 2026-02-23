@@ -23,7 +23,7 @@ export async function createTicket(values: z.infer<typeof formSchema>) {
   const validatedFields = formSchema.parse(values);
   
   try {
-    const newTicket = ticketStore.addTicket({
+    const newTicket = await ticketStore.addTicket({
       ...validatedFields,
       // Status and Priority are already validated by Zod
     });

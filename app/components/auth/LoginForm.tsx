@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useActionState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,20 +14,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginUser, loginAdmin } from "@/lib/mock-auth";
 import Link from "next/link";
-import { ShieldCheck, User as UserIcon } from "lucide-react";
+import { ShieldCheck, User as UserIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LoginForm() {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [state, formAction, isPending] = useActionState(
+    isAdmin ? loginAdmin : loginUser,
+    null
+  );
 
-  const handleSubmit = async (formData: FormData) => {
-    const result = isAdmin ? await loginAdmin(formData) : await loginUser(formData);
-    if (result?.error) {
-      setError(result.error);
-      toast.error(result.error);
+  useEffect(() => {
+    if (state?.error) {
+      toast.error(state.error);
     }
-  };
+  }, [state]);
 
   return (
     <div className="space-y-4 w-full max-w-sm">
@@ -35,7 +36,8 @@ export default function LoginForm() {
         <Button
           variant={!isAdmin ? "default" : "ghost"}
           className="flex-1 gap-2"
-          onClick={() => { setIsAdmin(false); setError(null); }}
+          onClick={() => { setIsAdmin(false); }}
+          disabled={isPending}
         >
           <UserIcon className="h-4 w-4" />
           User
@@ -43,7 +45,8 @@ export default function LoginForm() {
         <Button
           variant={isAdmin ? "default" : "ghost"}
           className="flex-1 gap-2"
-          onClick={() => { setIsAdmin(true); setError(null); }}
+          onClick={() => { setIsAdmin(true); }}
+          disabled={isPending}
         >
           <ShieldCheck className="h-4 w-4" />
           Admin
@@ -59,9 +62,9 @@ export default function LoginForm() {
               : "Enter your name and password to access your account."}
           </CardDescription>
         </CardHeader>
-        <form action={handleSubmit}>
+        <form action={formAction}>
           <CardContent className="grid gap-4">
-            {error && <div className="text-destructive text-sm font-medium">{error}</div>}
+            {state?.error && <div className="text-destructive text-sm font-medium">{state.error}</div>}
             <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>
               <Input 
@@ -70,16 +73,24 @@ export default function LoginForm() {
                 type="text" 
                 placeholder={isAdmin ? "Admin Name" : "Your Name"} 
                 required 
+                disabled={isPending}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required />
+              <Input id="password" name="password" type="password" placeholder="••••••••" required disabled={isPending} />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full">
-              Sign in as {isAdmin ? "Admin" : "User"}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                `Sign in as ${isAdmin ? "Admin" : "User"}`
+              )}
             </Button>
             {!isAdmin && (
               <div className="text-center text-sm">

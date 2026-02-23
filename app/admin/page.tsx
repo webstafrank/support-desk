@@ -5,33 +5,23 @@ import { type Ticket } from "@/app/tickets/data";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2, Eye, Calendar, User, Search, Filter, Clock, AlertCircle, Loader2, RefreshCw, MessageSquare } from "lucide-react";
+import { Trash2, Calendar, User, Search, RefreshCw, MessageSquare, Loader2 } from "lucide-react";
 import TicketStatus from "@/components/tickets/TicketStatus";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 export default function AdminDashboard() {
   const [ticketList, setTicketList] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
   const fetchTickets = async () => {
     setLoading(true);
     try {
       const response = await fetch("/api/tickets");
       const data = await response.json();
-      setTicketList(data.tickets.map((t: any) => ({
+      setTicketList(data.tickets.map((t: Ticket) => ({
         ...t,
         createdAt: new Date(t.createdAt),
         updatedAt: new Date(t.updatedAt),
@@ -127,7 +117,7 @@ export default function AdminDashboard() {
                 <CardHeader className="p-5 pb-0">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <CardTitle className="text-lg font-bold hover:underline cursor-pointer" onClick={() => setSelectedTicket(ticket)}>
+                      <CardTitle className="text-lg font-bold">
                         {ticket.subject}
                       </CardTitle>
                       <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -155,64 +145,12 @@ export default function AdminDashboard() {
                   </p>
                 </CardContent>
                 <CardFooter className="p-5 pt-0 flex justify-end gap-2 bg-muted/30 pt-3">
-                  <Dialog open={selectedTicket?.id === ticket.id} onOpenChange={(open) => !open && setSelectedTicket(null)}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="gap-2" onClick={() => setSelectedTicket(ticket)}>
-                        <Eye className="h-4 w-4" />
-                        View More
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px]">
-                      <DialogHeader>
-                        <div className="flex items-center gap-2 mb-2">
-                          <TicketStatus status={ticket.status} />
-                          <Badge variant={ticket.priority === "high" ? "destructive" : "secondary"}>
-                            {ticket.priority.toUpperCase()} PRIORITY
-                          </Badge>
-                        </div>
-                        <DialogTitle className="text-2xl">{ticket.subject}</DialogTitle>
-                        <DialogDescription className="flex items-center gap-4 mt-2">
-                          <span className="flex items-center gap-1">
-                            <User className="h-3.5 w-3.5" />
-                            {ticket.name}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3.5 w-3.5" />
-                            Created: {ticket.createdAt.toLocaleString()}
-                          </span>
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="py-6 border-t border-b mt-4">
-                        <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                          <AlertCircle className="h-4 w-4 text-primary" />
-                          Problem Description
-                        </h4>
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
-                          {ticket.problemDescription}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Clock className="h-3.5 w-3.5" />
-                        Last updated: {ticket.updatedAt.toLocaleString()}
-                      </div>
-                      <DialogFooter className="mt-6">
-                        <Link href="/admin/chat">
-                          <Button variant="outline" className="gap-2">
-                            <MessageSquare className="h-4 w-4" />
-                            Chat with User
-                          </Button>
-                        </Link>
-                        <Button variant="outline" onClick={() => setSelectedTicket(null)}>Close</Button>
-                        <Button variant="destructive" className="gap-2" onClick={() => {
-                          handleDelete(ticket.id);
-                          setSelectedTicket(null);
-                        }}>
-                          <Trash2 className="h-4 w-4" />
-                          Delete Request
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+                  <Link href="/admin/chat">
+                    <Button variant="outline" size="sm" className="gap-2 border-primary/20 hover:bg-primary/5">
+                      <MessageSquare className="h-4 w-4 text-primary" />
+                      Chat with User
+                    </Button>
+                  </Link>
                   
                   <Button 
                     variant="destructive" 
