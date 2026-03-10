@@ -23,7 +23,7 @@ export default function LoadingPage() {
         </div>
         <h1 className="text-3xl font-bold tracking-tight mb-2">Booking your ticket...</h1>
         <p className="text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-1000">
-          We're connecting you with our support team.
+          We&apos;re connecting you with our support team.
         </p>
         
         <div className="mt-8 w-64 h-2 bg-muted rounded-full overflow-hidden">

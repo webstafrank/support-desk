@@ -22,15 +22,10 @@ export async function POST(request: Request) {
     const model = genAI.getGenerativeModel({ 
       model: "gemini-1.5-flash",
       systemInstruction: "You are a helpful IT support assistant for KSA IT Support. Be concise, professional, and friendly. Help the user solve their technical issue. Use the Google Search tool when necessary to provide accurate and up-to-date information.",
-      tools: [
-        {
-          googleSearch: {},
-        },
-      ] as any,
     });
 
     // Format history for Gemini
-    const chatHistory: Content[] = (history || []).map((msg: any) => ({
+    const chatHistory: Content[] = (history || []).map((msg: { sender: string; text: string }) => ({
       role: msg.sender === 'user' ? 'user' : 'model',
       parts: [{ text: msg.text }],
     }));

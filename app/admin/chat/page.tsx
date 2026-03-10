@@ -13,6 +13,11 @@ import { toast } from "sonner";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+interface ChatSession {
+  chatId: string;
+  senderName: string;
+}
+
 export default function AdminChatPage() {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [input, setInput] = useState("");
@@ -31,7 +36,7 @@ export default function AdminChatPage() {
     { refreshInterval: 2000 }
   );
 
-  const sessions = sessionsData?.sessions || [];
+  const sessions: ChatSession[] = sessionsData?.sessions || [];
   const messages: ChatMessage[] = messagesData?.messages || [];
 
   useEffect(() => {
@@ -92,7 +97,7 @@ export default function AdminChatPage() {
                 No active chat sessions
               </div>
             ) : (
-              sessions.map((session: any) => (
+              sessions.map((session) => (
                 <button
                   key={session.chatId}
                   onClick={() => setSelectedChatId(session.chatId)}
@@ -136,7 +141,7 @@ export default function AdminChatPage() {
                     <ShieldCheck className="h-6 w-6 text-primary" />
                     <div>
                       <CardTitle className="flex items-center gap-2 text-lg">
-                        {sessions.find((s: any) => s.chatId === selectedChatId)?.senderName || "User Chat"}
+                        {sessions.find((s) => s.chatId === selectedChatId)?.senderName || "User Chat"}
                         <Badge className="bg-primary text-primary-foreground">Active</Badge>
                       </CardTitle>
                       <CardDescription>Managing user support conversation</CardDescription>
