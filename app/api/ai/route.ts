@@ -1,22 +1,19 @@
 import { NextResponse } from 'next/server'
-import { GoogleGenerativeAI } from "@google/generative-ai"
+import { GoogleGenerativeAI, Content } from "@google/generative-ai"
 
-// Note: Ensure GEMINI_API_KEY is set in your environment variables
 const API_KEY = process.env.GEMINI_API_KEY;
 
 export async function POST(request: Request) {
   try {
-    const { message } = await request.json();
+    const { message, history } = await request.json();
 
     if (!message) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
-    // Fallback if API key is not present (for development/demo purposes)
     if (!API_KEY) {
       console.warn("GEMINI_API_KEY not found. Using local fallback.");
       const mockResponse = getMockResponse(message);
-      // Simulate slight delay
       await new Promise(resolve => setTimeout(resolve, 800));
       return NextResponse.json({ response: mockResponse, source: "Local Gemma Mock" });
     }
@@ -32,7 +29,17 @@ export async function POST(request: Request) {
       ] as any,
     });
 
-    const result = await model.generateContent(message);
+    // Format history for Gemini
+    const chatHistory: Content[] = (history || []).map((msg: any) => ({
+      role: msg.sender === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.text }],
+    }));
+
+    const chat = model.startChat({
+      history: chatHistory,
+    });
+
+    const result = await chat.sendMessage(message);
     const responseText = result.response.text();
 
     return NextResponse.json({ 
@@ -45,7 +52,6 @@ export async function POST(request: Request) {
   }
 }
 
-// Simple local fallback responses for standard support queries
 function getMockResponse(userMessage: string): string {
   const msg = userMessage.toLowerCase();
   if (msg.includes("printer") || msg.includes("print")) {

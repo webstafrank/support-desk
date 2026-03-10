@@ -17,15 +17,34 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function TechChatPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>("User");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data, error, mutate } = useSWR("/api/chat", fetcher, {
-    refreshInterval: 2000, // Poll every 2 seconds for new messages
-  });
+  useEffect(() => {
+    // Get user name from cookie or generate a random ID
+    const cookies = document.cookie.split(';');
+    const nameCookie = cookies.find(c => c.trim().startsWith('it_support_name='));
+    const name = nameCookie ? decodeURIComponent(nameCookie.split('=')[1]) : "User";
+    setUserName(name);
+
+    // Get or create a unique chatId for this session/user
+    let id = localStorage.getItem('support_chat_id');
+    if (!id) {
+      id = name !== "User" ? name : `user_${Math.random().toString(36).substring(7)}`;
+      localStorage.setItem('support_chat_id', id);
+    }
+    setChatId(id);
+  }, []);
+
+  const { data, error, mutate } = useSWR(
+    chatId ? `/api/chat?chatId=${chatId}` : null, 
+    fetcher, 
+    { refreshInterval: 2000 }
+  );
 
   const messages: ChatMessage[] = data?.messages || [];
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -34,7 +53,7 @@ export default function TechChatPage() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || sending) return;
+    if (!input.trim() || sending || !chatId) return;
 
     setSending(true);
     try {
@@ -43,14 +62,15 @@ export default function TechChatPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sender: "user",
-          senderName: "User",
+          senderName: userName,
           text: input.trim(),
+          chatId: chatId,
         }),
       });
 
       if (response.ok) {
         setInput("");
-        mutate(); // Re-fetch messages immediately
+        mutate();
       } else {
         toast.error("Failed to send message");
       }
@@ -88,9 +108,15 @@ export default function TechChatPage() {
           ref={scrollRef}
           className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth bg-gradient-to-b from-transparent to-primary/5"
         >
-          {messages.length === 0 && !error && (
-            <div className="flex justify-center items-center h-full">
+          {!chatId && (
+             <div className="flex justify-center items-center h-full">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          )}
+          
+          {chatId && messages.length === 0 && !error && (
+            <div className="text-center py-10 text-muted-foreground">
+              <p>No messages yet. Send a message to start chatting with a technician.</p>
             </div>
           )}
 
@@ -113,7 +139,7 @@ export default function TechChatPage() {
                 msg.sender === "admin" ? "bg-primary/10" : "bg-secondary/10"
               )}>
                 {msg.sender === "admin" ? (
-                  <MessageSquare className="h-5 w-5 text-primary" />
+                  <ShieldCheck className="h-5 w-5 text-primary" />
                 ) : (
                   <User className="h-5 w-5 text-secondary" />
                 )}
@@ -144,9 +170,9 @@ export default function TechChatPage() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Message technician..." 
               className="flex-1 bg-background" 
-              disabled={sending}
+              disabled={sending || !chatId}
             />
-            <Button type="submit" disabled={sending || !input.trim()}>
+            <Button type="submit" disabled={sending || !input.trim() || !chatId}>
               {sending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -160,5 +186,22 @@ export default function TechChatPage() {
         </div>
       </Card>
     </div>
+  );
+}
+
+// Simple ShieldCheck icon since it was missing in some imports
+function ShieldCheck({ className }: { className?: string }) {
+  return (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      width="24" height="24" 
+      viewBox="0 0 24 24" fill="none" 
+      stroke="currentColor" strokeWidth="2" 
+      strokeLinecap="round" strokeLinejoin="round" 
+      className={className}
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
   );
 }

@@ -16,8 +16,10 @@ import { loginUser, loginAdmin } from "@/lib/mock-auth";
 import Link from "next/link";
 import { ShieldCheck, User as UserIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 
 export default function LoginForm() {
+  const searchParams = useSearchParams();
   const [isAdmin, setIsAdmin] = useState(false);
   const [state, formAction, isPending] = useActionState(
     isAdmin ? loginAdmin : loginUser,
@@ -28,7 +30,11 @@ export default function LoginForm() {
     if (state?.error) {
       toast.error(state.error);
     }
-  }, [state]);
+    
+    if (searchParams.get("signup") === "success") {
+      toast.success("Account created successfully! Please log in.");
+    }
+  }, [state, searchParams]);
 
   return (
     <div className="space-y-4 w-full max-w-sm">

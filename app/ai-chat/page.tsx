@@ -47,6 +47,8 @@ export default function AIChatPage() {
       timestamp: new Date(),
     };
 
+    const currentHistory = messages.filter(m => m.id !== "1"); // Exclude greeting for history
+    
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
@@ -55,7 +57,13 @@ export default function AIChatPage() {
       const response = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage.text }),
+        body: JSON.stringify({ 
+          message: userMessage.text,
+          history: currentHistory.map(m => ({
+            sender: m.sender === 'ai' ? 'model' : 'user',
+            text: m.text
+          }))
+        }),
       });
 
       const data = await response.json();
@@ -80,6 +88,17 @@ export default function AIChatPage() {
     }
   };
 
+  const clearChat = () => {
+    setMessages([
+      {
+        id: "1",
+        sender: "ai",
+        text: "Hello! I am your AI support assistant powered by Gemini. How can I help you today?",
+        timestamp: new Date(),
+      }
+    ]);
+  };
+
   return (
     <div className="container py-10 flex flex-col items-center">
       <Card className="w-full max-w-4xl h-[75vh] flex flex-col border-primary/20 shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
@@ -96,12 +115,18 @@ export default function AIChatPage() {
                 </CardDescription>
               </div>
             </div>
-            <Link href="/waitlist">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <ChevronLeft className="h-4 w-4" />
-                Back to Waitlist
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={clearChat} className="gap-2">
+                <RefreshCw className="h-4 w-4" />
+                New Chat
               </Button>
-            </Link>
+              <Link href="/waitlist">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <ChevronLeft className="h-4 w-4" />
+                  Back
+                </Button>
+              </Link>
+            </div>
           </div>
         </CardHeader>
 

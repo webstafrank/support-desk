@@ -53,17 +53,14 @@ export async function signupUser(prevState: unknown, formData: FormData) {
       [id, name, password, department, "user", now, now]
     );
   } catch (err) {
+    if ((err as { digest?: string })?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw err;
+    }
     console.error("Signup error:", err);
     return { error: "An error occurred during signup" };
   }
   
-  // Set session
-  const maxAge = 60 * 60 * 24 * 7; // 7 days
-  (await cookies()).set("it_support_role", "user", { maxAge });
-  (await cookies()).set("it_support_name", name, { maxAge });
-  (await cookies()).set("it_support_key", "secret1234", { maxAge });
-  
-  redirect("/");
+  redirect("/login?signup=success");
 }
 
 export async function loginUser(prevState: unknown, formData: FormData) {
@@ -74,22 +71,24 @@ export async function loginUser(prevState: unknown, formData: FormData) {
     return { error: "Name and password are required" };
   }
 
+  let user: User | undefined;
   try {
     const result = await pool.query('SELECT * FROM "ksa"."User" WHERE name = $1 AND password = $2', [name, password]);
-    const user = result.rows[0] as User | undefined;
+    user = result.rows[0] as User | undefined;
     
     if (!user) {
       return { error: "Invalid user credentials" };
     }
-
-    const maxAge = 60 * 60 * 24 * 7; // 7 days
-    (await cookies()).set("it_support_role", user.role, { maxAge });
-    (await cookies()).set("it_support_name", user.name, { maxAge });
-    (await cookies()).set("it_support_key", "secret1234", { maxAge });
   } catch (err) {
     console.error("Login error:", err);
     return { error: "An error occurred during login" };
   }
+
+  const maxAge = 60 * 60 * 24 * 7; // 7 days
+  const cookieStore = await cookies();
+  cookieStore.set("it_support_role", user.role, { maxAge });
+  cookieStore.set("it_support_name", user.name, { maxAge });
+  cookieStore.set("it_support_key", "secret1234", { maxAge });
   
   redirect("/");
 }
@@ -103,22 +102,24 @@ export async function loginAdmin(prevState: unknown, formData: FormData) {
     return { error: "Name and password are required" };
   }
 
+  let admin: User | undefined;
   try {
     const result = await pool.query('SELECT * FROM "ksa"."User" WHERE name = $1 AND password = $2 AND role = $3', [name, password, "admin"]);
-    const admin = result.rows[0] as User | undefined;
+    admin = result.rows[0] as User | undefined;
     
     if (!admin) {
       return { error: "Invalid admin credentials" };
     }
-
-    const maxAge = 60 * 60 * 24 * 7; // 7 days
-    (await cookies()).set("it_support_role", "admin", { maxAge });
-    (await cookies()).set("it_support_name", admin.name, { maxAge });
-    (await cookies()).set("it_support_key", "secret1234", { maxAge });
   } catch (err) {
     console.error("Admin login error:", err);
     return { error: "An error occurred during admin login" };
   }
+
+  const maxAge = 60 * 60 * 24 * 7; // 7 days
+  const cookieStore = await cookies();
+  cookieStore.set("it_support_role", "admin", { maxAge });
+  cookieStore.set("it_support_name", admin.name, { maxAge });
+  cookieStore.set("it_support_key", "secret1234", { maxAge });
   
   redirect("/admin");
 }

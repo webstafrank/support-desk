@@ -25,8 +25,9 @@ import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { tickets } from "@/app/tickets/data";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createTicket } from "@/app/lib/actions";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -44,6 +45,7 @@ const formSchema = z.object({
 
 export default function TicketForm({ id, defaultName = "" }: { id?: string; defaultName?: string }) {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,29 +70,37 @@ export default function TicketForm({ id, defaultName = "" }: { id?: string; defa
   }, [id, form, defaultName]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Ensure name is set if not provided (should be set by defaultName)
     if (!values.name && defaultName) {
       values.name = defaultName;
     }
     
-    // This onSubmit will now call the server action
+    setIsSubmitting(true);
+    
     if (id) {
-      // Update ticket logic (not part of this request)
+      // Update ticket logic
       toast.success("Ticket updated successfully!");
+      setIsSubmitting(false);
     } else {
-      const result = await createTicket(values);
-      if (result.success) {
-        toast.success("Ticket created successfully!");
-        router.push("/tickets/waiting");
-      } else {
-        toast.error(result.message);
+      try {
+        const result = await createTicket(values);
+        if (result.success) {
+          toast.success("Ticket created successfully!");
+          // Redirect to the custom loading page
+          router.push("/tickets/loading");
+        } else {
+          toast.error(result.message);
+          setIsSubmitting(false);
+        }
+      } catch (error) {
+        toast.error("Something went wrong");
+        setIsSubmitting(false);
       }
     }
   }
 
   return (
-    <Card className="w-full max-w-lg">
-      <CardHeader>
+    <Card className="w-full max-w-lg shadow-lg border-primary/10">
+      <CardHeader className="bg-muted/30">
         <CardTitle>{id ? "Edit Ticket" : "Create Ticket"}</CardTitle>
         <CardDescription>
           {id
@@ -98,7 +108,7 @@ export default function TicketForm({ id, defaultName = "" }: { id?: string; defa
             : "Describe your problem to get help."}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -110,7 +120,8 @@ export default function TicketForm({ id, defaultName = "" }: { id?: string; defa
                   <FormControl>
                     <Textarea
                       placeholder="Please describe what you need help with (e.g. 'I can't connect to the printer', 'My email is not syncing')"
-                      className="min-h-[120px]"
+                      className="min-h-[120px] bg-background"
+                      disabled={isSubmitting}
                       {...field}
                     />
                   </FormControl>
@@ -128,9 +139,10 @@ export default function TicketForm({ id, defaultName = "" }: { id?: string; defa
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled={isSubmitting}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-background">
                           <SelectValue placeholder="Select a status" />
                         </SelectTrigger>
                       </FormControl>
@@ -153,9 +165,10 @@ export default function TicketForm({ id, defaultName = "" }: { id?: string; defa
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled={isSubmitting}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-background">
                           <SelectValue placeholder="Select a priority" />
                         </SelectTrigger>
                       </FormControl>
@@ -170,8 +183,15 @@ export default function TicketForm({ id, defaultName = "" }: { id?: string; defa
                 )}
               />
             </div>
-            <Button type="submit" className="w-full h-11">
-              {id ? "Update Ticket" : "Submit Support Ticket"}
+            <Button type="submit" className="w-full h-11 shadow-md" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                id ? "Update Ticket" : "Submit Support Ticket"
+              )}
             </Button>
           </form>
         </Form>
