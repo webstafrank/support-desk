@@ -34,4 +34,5 @@ model ChatMessage {
   senderName String
   text       String
   timestamp  DateTime @default(now())
+  chatId     String
 }

@@ -16,12 +16,12 @@ const DEFAULT_ADMIN = { name: "admin", password: "998877", department: "IT", rol
 
 async function ensureAdmin() {
   try {
-    const result = await pool.query('SELECT * FROM "ksa"."User" WHERE name = $1', [DEFAULT_ADMIN.name]);
+    const result = await pool.query('SELECT * FROM "User" WHERE name = $1', [DEFAULT_ADMIN.name]);
     if (result.rowCount === 0) {
       const id = Math.random().toString(36).substring(7);
       const now = new Date();
       await pool.query(
-        'INSERT INTO "ksa"."User" (id, name, password, department, role, "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, $7)',
+        'INSERT INTO "User" (id, name, password, department, role, "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, $7)',
         [id, DEFAULT_ADMIN.name, DEFAULT_ADMIN.password, DEFAULT_ADMIN.department, DEFAULT_ADMIN.role, now, now]
       );
     }
@@ -41,7 +41,7 @@ export async function signupUser(prevState: unknown, formData: FormData) {
 
   try {
     // Check if user already exists
-    const result = await pool.query('SELECT * FROM "ksa"."User" WHERE name = $1', [name]);
+    const result = await pool.query('SELECT * FROM "User" WHERE name = $1', [name]);
     if (result.rowCount && result.rowCount > 0) {
       return { error: "User already exists" };
     }
@@ -49,7 +49,7 @@ export async function signupUser(prevState: unknown, formData: FormData) {
     const id = Math.random().toString(36).substring(7);
     const now = new Date();
     await pool.query(
-      'INSERT INTO "ksa"."User" (id, name, password, department, role, "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      'INSERT INTO "User" (id, name, password, department, role, "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, $7)',
       [id, name, password, department, "user", now, now]
     );
   } catch (err) {
@@ -73,7 +73,7 @@ export async function loginUser(prevState: unknown, formData: FormData) {
 
   let user: User | undefined;
   try {
-    const result = await pool.query('SELECT * FROM "ksa"."User" WHERE name = $1 AND password = $2', [name, password]);
+    const result = await pool.query('SELECT * FROM "User" WHERE name = $1 AND password = $2', [name, password]);
     user = result.rows[0] as User | undefined;
     
     if (!user) {
@@ -104,7 +104,7 @@ export async function loginAdmin(prevState: unknown, formData: FormData) {
 
   let admin: User | undefined;
   try {
-    const result = await pool.query('SELECT * FROM "ksa"."User" WHERE name = $1 AND password = $2 AND role = $3', [name, password, "admin"]);
+    const result = await pool.query('SELECT * FROM "User" WHERE name = $1 AND password = $2 AND role = $3', [name, password, "admin"]);
     admin = result.rows[0] as User | undefined;
     
     if (!admin) {

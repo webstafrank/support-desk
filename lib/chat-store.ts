@@ -23,7 +23,7 @@ class ChatStore {
 
   public async getMessages(chatId?: string): Promise<ChatMessage[]> {
     try {
-      let query = 'SELECT * FROM "ksa"."ChatMessage"';
+      let query = 'SELECT * FROM "ChatMessage"';
       const params = [];
       if (chatId) {
         query += ' WHERE "chatId" = $1';
@@ -44,7 +44,7 @@ class ChatStore {
   public async getChatSessions(): Promise<{ chatId: string; senderName: string }[]> {
     try {
       const result = await pool.query(
-        'SELECT DISTINCT "chatId", "senderName" FROM "ksa"."ChatMessage" WHERE sender = \'user\''
+        'SELECT DISTINCT "chatId", "senderName" FROM "ChatMessage" WHERE sender = \'user\''
       );
       return result.rows;
     } catch (error) {
@@ -58,7 +58,7 @@ class ChatStore {
     const now = new Date();
     try {
       const result = await pool.query(
-        'INSERT INTO "ksa"."ChatMessage" (id, sender, "senderName", text, timestamp, "chatId") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        'INSERT INTO "ChatMessage" (id, sender, "senderName", text, timestamp, "chatId") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
         [id, message.sender, message.senderName, message.text, now, message.chatId]
       );
       const row = result.rows[0];

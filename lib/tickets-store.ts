@@ -16,7 +16,7 @@ class TicketStore {
 
   public async getTickets(): Promise<Ticket[]> {
     try {
-      const result = await pool.query('SELECT * FROM "ksa"."Ticket" ORDER BY "createdAt" ASC');
+      const result = await pool.query('SELECT * FROM "Ticket" ORDER BY "createdAt" ASC');
       return result.rows.map((row: Record<string, unknown>) => ({
         ...row,
         createdAt: new Date(row.createdAt as string),
@@ -33,7 +33,7 @@ class TicketStore {
     const now = new Date();
     try {
       const result = await pool.query(
-        'INSERT INTO "ksa"."Ticket" (id, name, subject, "problemDescription", status, priority, "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+        'INSERT INTO "Ticket" (id, name, subject, "problemDescription", status, priority, "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
         [id, ticket.name, ticket.subject, ticket.problemDescription, ticket.status, ticket.priority, now, now]
       );
       const row = result.rows[0];
@@ -50,7 +50,7 @@ class TicketStore {
 
   public async deleteTicket(id: string): Promise<boolean> {
     try {
-      const result = await pool.query('DELETE FROM "ksa"."Ticket" WHERE id = $1', [id]);
+      const result = await pool.query('DELETE FROM "Ticket" WHERE id = $1', [id]);
       return result.rowCount ? result.rowCount > 0 : false;
     } catch (error) {
       console.error("Error deleting ticket:", error);
