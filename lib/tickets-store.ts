@@ -1,7 +1,6 @@
-import pool from "./db";
+import prisma from "./prisma";
 import { type Ticket } from "@/app/tickets/data"
 
-// Database-backed store for the prototype using node-postgres
 class TicketStore {
   private static instance: TicketStore;
 
@@ -16,12 +15,9 @@ class TicketStore {
 
   public async getTickets(): Promise<Ticket[]> {
     try {
-      const result = await pool.query('SELECT * FROM "Ticket" ORDER BY "createdAt" ASC');
-      return result.rows.map((row: Record<string, unknown>) => ({
-        ...row,
-        createdAt: new Date(row.createdAt as string),
-        updatedAt: new Date(row.updatedAt as string)
-      } as Ticket));
+      return await prisma.ticket.findMany({
+        orderBy: { createdAt: "asc" }
+      }) as unknown as Ticket[];
     } catch (error) {
       console.error("Error fetching tickets:", error);
       return [];
@@ -29,19 +25,17 @@ class TicketStore {
   }
 
   public async addTicket(ticket: Omit<Ticket, "id" | "createdAt" | "updatedAt">): Promise<Ticket> {
-    const id = Math.random().toString(36).substring(7);
-    const now = new Date();
     try {
-      const result = await pool.query(
-        'INSERT INTO "Ticket" (id, name, subject, "problemDescription", status, priority, "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-        [id, ticket.name, ticket.subject, ticket.problemDescription, ticket.status, ticket.priority, now, now]
-      );
-      const row = result.rows[0];
-      return {
-        ...row,
-        createdAt: new Date(row.createdAt),
-        updatedAt: new Date(row.updatedAt)
-      };
+      return await prisma.ticket.create({
+        data: {
+          name: ticket.name,
+          subject: ticket.subject,
+          problemDescription: ticket.problemDescription,
+          status: ticket.status,
+          priority: ticket.priority,
+          department: (ticket as { department?: string }).department || "",
+        }
+      }) as unknown as Ticket;
     } catch (error) {
       console.error("Error adding ticket:", error);
       throw error;
@@ -50,8 +44,10 @@ class TicketStore {
 
   public async deleteTicket(id: string): Promise<boolean> {
     try {
-      const result = await pool.query('DELETE FROM "Ticket" WHERE id = $1', [id]);
-      return result.rowCount ? result.rowCount > 0 : false;
+      await prisma.ticket.delete({
+        where: { id }
+      });
+      return true;
     } catch (error) {
       console.error("Error deleting ticket:", error);
       return false;

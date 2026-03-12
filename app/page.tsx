@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { cookies } from "next/headers";
+import { auth } from "@/auth";
 import { ArrowRight, Ticket, ClipboardList, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function Home() {
-  const cookieStore = await cookies();
-  const role = cookieStore.get("it_support_role")?.value;
-  const name = cookieStore.get("it_support_name")?.value;
+  const session = await auth();
+  const role = session?.user?.role;
+  const name = session?.user?.name;
 
   return (
     <main className="container flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] mx-auto px-4 text-center">

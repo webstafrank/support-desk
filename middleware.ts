@@ -1,42 +1,55 @@
-import { NextRequest, NextResponse } from "next/server";
+import NextAuth from "next-auth";
+import authConfig from "./auth.config";
+import { NextResponse } from "next/server";
 
-export function middleware(request: NextRequest) {
-  const cookie = request.cookies.get("it_support_key")?.value;
-  const role = request.cookies.get("it_support_role")?.value;
-  const pathname = request.nextUrl.pathname;
+const { auth } = NextAuth(authConfig);
 
-  // Basic authentication check
-  if (cookie !== "secret1234" && !pathname.startsWith("/login") && !pathname.startsWith("/signup")) {
-    return NextResponse.redirect(new URL("/login", request.url));
+export default auth((req) => {
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
+  const user = req.auth?.user;
+  const role = user?.role;
+
+  const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
+  const isPublicRoute = ["/login", "/signup"].includes(nextUrl.pathname);
+  const isAdminRoute = nextUrl.pathname.startsWith("/admin");
+
+  // 1. Allow API Auth routes always
+  if (isApiAuthRoute) {
+    return NextResponse.next();
   }
 
-  // Redirect authenticated users from login or signup to home/admin
-  if ((pathname.startsWith("/login") || pathname.startsWith("/signup")) && cookie === "secret1234") {
-    if (role === "admin") {
-      return NextResponse.redirect(new URL("/admin", request.url));
+  // 2. Redirect logged-in users away from public auth pages
+  if (isPublicRoute) {
+    if (isLoggedIn) {
+      return NextResponse.redirect(
+        new URL(role === "admin" ? "/admin" : "/", nextUrl)
+      );
     }
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.next();
   }
 
-  // Admin access control: Admins ONLY see /admin and home
+  // 3. Ensure user is logged in for all other routes
+  if (!isLoggedIn) {
+    return NextResponse.redirect(new URL("/login", nextUrl));
+  }
+
+  // 4. Role-based access control
+  if (isAdminRoute && role !== "admin") {
+    return NextResponse.redirect(new URL("/", nextUrl));
+  }
+
+  // 5. Admin-specific restrictions for user-facing routes
+  // Redirect admins away from user-only pages (including the home page) to the admin dashboard
   if (role === "admin") {
-    if (pathname !== "/admin" && pathname !== "/" && pathname !== "/login" && pathname !== "/tickets/waiting") {
-       // Optional: Redirect admins back to dashboard if they try to access user-only pages
-       if (pathname.startsWith("/tickets/create") || pathname.startsWith("/waitlist")) {
-          return NextResponse.redirect(new URL("/admin", request.url));
-       }
-    }
-  }
-
-  // User access control: Users ONLY see home, tickets/create, waitlist, and tickets/waiting
-  if (role === "user") {
-    if (pathname.startsWith("/admin")) {
-      return NextResponse.redirect(new URL("/", request.url));
+    const isUserOnlyRoute = nextUrl.pathname === "/" || nextUrl.pathname === "/tickets/create" || nextUrl.pathname === "/waitlist";
+    if (isUserOnlyRoute) {
+      return NextResponse.redirect(new URL("/admin", nextUrl));
     }
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],

@@ -1,20 +1,68 @@
 generator client {
-  provider = "prisma-client-js"
-  }
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["ksa"]
 }
 
 model User {
-  id         String   @id @default(cuid())
-  name       String   @unique
-  password   String
-  department String
-  role       String   @default("user")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id             String    @id @default(cuid())
+  name           String?   @unique
+  hashedPassword String?   @map("password")
+  department     String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  role           String    @default("user")
+  accounts       Account[]
+  sessions       Session[]
+
+  @@map("User")
+  @@schema("ksa")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("Account")
+  @@schema("ksa")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("Session")
+  @@schema("ksa")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("VerificationToken")
+  @@schema("ksa")
 }
 
 model Ticket {
@@ -22,17 +70,23 @@ model Ticket {
   name               String
   subject            String
   problemDescription String
-  status             String   @default("open")
-  priority           String   @default("medium")
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+  status             String   @default("open")
+  priority           String   @default("medium")
+
+  @@map("Ticket")
+  @@schema("ksa")
 }
 
 model ChatMessage {
   id         String   @id @default(cuid())
-  sender     String
   senderName String
   text       String
   timestamp  DateTime @default(now())
-  chatId     String
+  sender     String
+  chatId     String?
+
+  @@map("ChatMessage")
+  @@schema("ksa")
 }

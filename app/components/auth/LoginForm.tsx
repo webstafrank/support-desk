@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { loginUser, loginAdmin } from "@/lib/mock-auth";
+import { loginUser, loginAdmin } from "@/lib/auth-actions";
 import Link from "next/link";
 import { ShieldCheck, User as UserIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";

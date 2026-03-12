@@ -2,26 +2,29 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { cookies } from "next/headers";
+import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { LogOut, User, ShieldCheck } from "lucide-react";
-import { logout } from "@/lib/mock-auth";
+import { logout } from "@/lib/auth-actions";
 
 export default async function Navbar() {
-  const cookieStore = await cookies();
-  const role = cookieStore.get("it_support_role")?.value;
-  const name = cookieStore.get("it_support_name")?.value;
+  const session = await auth();
+  const role = session?.user?.role;
+  const name = session?.user?.name;
 
   return (
     <Card className="p-4 mb-4 shadow-sm border-none rounded-none md:rounded-lg">
       <nav className="container flex items-center justify-between mx-auto">
         <div className="flex items-center gap-6">
-          <Link href="/" className="font-bold text-xl tracking-tight text-primary">
+          <Link href={role === "admin" ? "/admin" : "/"} className="font-bold text-xl tracking-tight text-primary">
             KSA IT
           </Link>
           
           <div className="flex items-center gap-2">
-            <Link href="/" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
+            <Link 
+              href={role === "admin" ? "/admin" : "/"} 
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+            >
               Home
             </Link>
             

@@ -1,4 +1,4 @@
-import pool from "./db";
+import prisma from "./prisma";
 
 export type ChatMessage = {
   id: string;
@@ -23,18 +23,11 @@ class ChatStore {
 
   public async getMessages(chatId?: string): Promise<ChatMessage[]> {
     try {
-      let query = 'SELECT * FROM "ChatMessage"';
-      const params = [];
-      if (chatId) {
-        query += ' WHERE "chatId" = $1';
-        params.push(chatId);
-      }
-      query += ' ORDER BY timestamp ASC';
-      const result = await pool.query(query, params);
-      return result.rows.map((row: Record<string, unknown>) => ({
-        ...row,
-        timestamp: new Date(row.timestamp as string)
-      } as ChatMessage));
+      const where = chatId ? { chatId } : {};
+      return await prisma.chatMessage.findMany({
+        where,
+        orderBy: { timestamp: "asc" }
+      }) as unknown as ChatMessage[];
     } catch (error) {
       console.error("Error fetching chat messages:", error);
       return [];
@@ -43,10 +36,15 @@ class ChatStore {
 
   public async getChatSessions(): Promise<{ chatId: string; senderName: string }[]> {
     try {
-      const result = await pool.query(
-        'SELECT DISTINCT "chatId", "senderName" FROM "ChatMessage" WHERE sender = \'user\''
-      );
-      return result.rows;
+      const messages = await prisma.chatMessage.findMany({
+        where: { sender: "user" },
+        distinct: ["chatId", "senderName"],
+        select: {
+          chatId: true,
+          senderName: true
+        }
+      });
+      return messages;
     } catch (error) {
       console.error("Error fetching chat sessions:", error);
       return [];
@@ -54,18 +52,15 @@ class ChatStore {
   }
 
   public async addMessage(message: Omit<ChatMessage, "id" | "timestamp">): Promise<ChatMessage> {
-    const id = Math.random().toString(36).substring(7);
-    const now = new Date();
     try {
-      const result = await pool.query(
-        'INSERT INTO "ChatMessage" (id, sender, "senderName", text, timestamp, "chatId") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-        [id, message.sender, message.senderName, message.text, now, message.chatId]
-      );
-      const row = result.rows[0];
-      return {
-        ...row,
-        timestamp: new Date(row.timestamp)
-      };
+      return await prisma.chatMessage.create({
+        data: {
+          sender: message.sender,
+          senderName: message.senderName,
+          text: message.text,
+          chatId: message.chatId
+        }
+      }) as unknown as ChatMessage;
     } catch (error) {
       console.error("Error adding chat message:", error);
       throw error;
