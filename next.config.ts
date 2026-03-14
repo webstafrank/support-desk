@@ -3,18 +3,16 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   output: 'standalone',
-  turbopack: {},
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        fs: false,
-        module: false,
-        os: false,
-        path: false,
-        v8: false,
-      };
-    }
-    return config;
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-label",
+      "@radix-ui/react-select",
+      "@radix-ui/react-slot",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-toast",
+    ],
   },
 };
 

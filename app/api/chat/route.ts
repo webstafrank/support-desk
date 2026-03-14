@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const body = await request.json()
-  const { sender, senderName, text, chatId } = body;
+  const { sender, senderName, text, chatId, department } = body;
   
   if (!sender || !text || !chatId) {
     return NextResponse.json({ success: false, message: "Missing sender, text or chatId" }, { status: 400 })
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     senderName: senderName || "User",
     text,
     chatId,
+    department,
   });
   
   return NextResponse.json({ success: true, message: newMessage })

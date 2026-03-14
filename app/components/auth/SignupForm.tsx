@@ -63,7 +63,7 @@ export default function SignupForm() {
           </Button>
           <div className="text-center text-sm">
             Already have an account?{" "}
-            <Link href="/login" className="underline font-medium hover:text-primary transition-colors">
+            <Link href="/" className="underline font-medium hover:text-primary transition-colors">
               Login
             </Link>
           </div>

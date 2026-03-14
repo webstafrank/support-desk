@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { ticketStore } from "@/lib/tickets-store";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -21,11 +22,13 @@ const formSchema = z.object({
 export async function createTicket(values: z.infer<typeof formSchema>) {
   // Validate data
   const validatedFields = formSchema.parse(values);
+  const session = await auth();
+  const department = (session?.user as any)?.department;
   
   try {
     const newTicket = await ticketStore.addTicket({
       ...validatedFields,
-      // Status and Priority are already validated by Zod
+      department: department || "General",
     });
     
     // Revalidate the admin dashboard path so it shows the new ticket if the user navigates there

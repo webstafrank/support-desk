@@ -1,12 +1,10 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["multiSchema"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["ksa"]
 }
 
 model User {
@@ -21,7 +19,6 @@ model User {
   sessions       Session[]
 
   @@map("User")
-  @@schema("ksa")
 }
 
 model Account {
@@ -41,7 +38,6 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@map("Account")
-  @@schema("ksa")
 }
 
 model Session {
@@ -52,7 +48,6 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("Session")
-  @@schema("ksa")
 }
 
 model VerificationToken {
@@ -62,7 +57,6 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("VerificationToken")
-  @@schema("ksa")
 }
 
 model Ticket {
@@ -70,13 +64,13 @@ model Ticket {
   name               String
   subject            String
   problemDescription String
+  department         String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   status             String   @default("open")
   priority           String   @default("medium")
 
   @@map("Ticket")
-  @@schema("ksa")
 }
 
 model ChatMessage {
@@ -86,7 +80,7 @@ model ChatMessage {
   timestamp  DateTime @default(now())
   sender     String
   chatId     String?
+  department String?
 
   @@map("ChatMessage")
-  @@schema("ksa")
 }

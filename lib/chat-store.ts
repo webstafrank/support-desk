@@ -7,6 +7,7 @@ export type ChatMessage = {
   text: string;
   timestamp: Date;
   chatId: string;
+  department?: string;
 };
 
 class ChatStore {
@@ -34,14 +35,15 @@ class ChatStore {
     }
   }
 
-  public async getChatSessions(): Promise<{ chatId: string; senderName: string }[]> {
+  public async getChatSessions(): Promise<{ chatId: string; senderName: string; department?: string }[]> {
     try {
       const messages = await prisma.chatMessage.findMany({
         where: { sender: "user" },
         distinct: ["chatId", "senderName"],
         select: {
           chatId: true,
-          senderName: true
+          senderName: true,
+          department: true,
         }
       });
       return messages;
@@ -58,7 +60,8 @@ class ChatStore {
           sender: message.sender,
           senderName: message.senderName,
           text: message.text,
-          chatId: message.chatId
+          chatId: message.chatId,
+          department: message.department || "General",
         }
       }) as unknown as ChatMessage;
     } catch (error) {

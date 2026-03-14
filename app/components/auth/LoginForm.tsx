@@ -101,7 +101,7 @@ export default function LoginForm() {
             {!isAdmin && (
               <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <Link href="/signup" className="underline font-medium hover:text-primary transition-colors">
+                <Link href="/?tab=signup" className="underline font-medium hover:text-primary transition-colors">
                   Sign up
                 </Link>
               </div>

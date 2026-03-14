@@ -125,6 +125,9 @@ export default function AdminDashboard() {
                           <User className="h-3.5 w-3.5" />
                           {ticket.name}
                         </span>
+                        <span className="flex items-center gap-1 bg-primary/10 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-primary">
+                          {(ticket as any).department || "General"}
+                        </span>
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5" />
                           {ticket.createdAt.toLocaleDateString()}

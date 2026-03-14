@@ -24,7 +24,7 @@ class TicketStore {
     }
   }
 
-  public async addTicket(ticket: Omit<Ticket, "id" | "createdAt" | "updatedAt">): Promise<Ticket> {
+  public async addTicket(ticket: Omit<Ticket, "id" | "createdAt" | "updatedAt"> & { department?: string }): Promise<Ticket> {
     try {
       return await prisma.ticket.create({
         data: {
@@ -33,7 +33,7 @@ class TicketStore {
           problemDescription: ticket.problemDescription,
           status: ticket.status,
           priority: ticket.priority,
-          department: (ticket as { department?: string }).department || "",
+          department: ticket.department || "General",
         }
       }) as unknown as Ticket;
     } catch (error) {

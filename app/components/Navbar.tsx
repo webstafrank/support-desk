@@ -16,13 +16,13 @@ export default async function Navbar() {
     <Card className="p-4 mb-4 shadow-sm border-none rounded-none md:rounded-lg">
       <nav className="container flex items-center justify-between mx-auto">
         <div className="flex items-center gap-6">
-          <Link href={role === "admin" ? "/admin" : "/"} className="font-bold text-xl tracking-tight text-primary">
+          <Link href={role === "admin" ? "/admin" : role === "user" ? "/dashboard" : "/"} className="font-bold text-xl tracking-tight text-primary">
             KSA IT
           </Link>
           
           <div className="flex items-center gap-2">
             <Link 
-              href={role === "admin" ? "/admin" : "/"} 
+              href={role === "admin" ? "/admin" : role === "user" ? "/dashboard" : "/"} 
               className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
             >
               Home
@@ -77,10 +77,10 @@ export default async function Navbar() {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Link href="/login" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
+              <Link href="/" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
                 Login
               </Link>
-              <Link href="/signup" className={cn(buttonVariants({ variant: "default", size: "sm" }))}>
+              <Link href="/?tab=signup" className={cn(buttonVariants({ variant: "default", size: "sm" }))}>
                 Sign up
               </Link>
             </div>

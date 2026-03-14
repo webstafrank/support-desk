@@ -16,6 +16,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 interface ChatSession {
   chatId: string;
   senderName: string;
+  department?: string;
 }
 
 export default function AdminChatPage() {
@@ -109,11 +110,21 @@ export default function AdminChatPage() {
                   )}
                 >
                   <div className="font-medium truncate">{session.senderName}</div>
-                  <div className={cn(
-                    "text-[10px] truncate",
-                    selectedChatId === session.chatId ? "text-primary-foreground/70" : "text-muted-foreground"
-                  )}>
-                    ID: {session.chatId}
+                  <div className="flex justify-between items-center">
+                    <div className={cn(
+                      "text-[10px] truncate",
+                      selectedChatId === session.chatId ? "text-primary-foreground/70" : "text-muted-foreground"
+                    )}>
+                      ID: {session.chatId}
+                    </div>
+                    {session.department && (
+                      <span className={cn(
+                        "text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider",
+                        selectedChatId === session.chatId ? "bg-primary-foreground/20 text-primary-foreground" : "bg-primary/10 text-primary"
+                      )}>
+                        {session.department}
+                      </span>
+                    )}
                   </div>
                 </button>
               ))

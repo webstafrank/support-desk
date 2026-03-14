@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 import { NextResponse } from "next/server";
 
+// Using the config-only initialization for middleware to keep it fast
 const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
@@ -11,7 +12,7 @@ export default auth((req) => {
   const role = user?.role;
 
   const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
-  const isPublicRoute = ["/login", "/signup"].includes(nextUrl.pathname);
+  const isPublicRoute = ["/", "/login", "/signup"].includes(nextUrl.pathname);
   const isAdminRoute = nextUrl.pathname.startsWith("/admin");
 
   // 1. Allow API Auth routes always
@@ -19,33 +20,25 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  // 2. Redirect logged-in users away from public auth pages
-  if (isPublicRoute) {
-    if (isLoggedIn) {
-      return NextResponse.redirect(
-        new URL(role === "admin" ? "/admin" : "/", nextUrl)
+  // 2. Redirect logged-in users away from auth pages (home, login, signup)
+  const isAuthPage = ["/", "/login", "/signup"].includes(nextUrl.pathname);
+  if (isLoggedIn) {
+    if (isAuthPage) {
+       return NextResponse.redirect(
+        new URL(role === "admin" ? "/admin" : "/dashboard", nextUrl)
       );
     }
     return NextResponse.next();
   }
 
   // 3. Ensure user is logged in for all other routes
-  if (!isLoggedIn) {
-    return NextResponse.redirect(new URL("/login", nextUrl));
+  if (!isLoggedIn && !isPublicRoute) {
+    return NextResponse.redirect(new URL("/", nextUrl));
   }
 
   // 4. Role-based access control
   if (isAdminRoute && role !== "admin") {
     return NextResponse.redirect(new URL("/", nextUrl));
-  }
-
-  // 5. Admin-specific restrictions for user-facing routes
-  // Redirect admins away from user-only pages (including the home page) to the admin dashboard
-  if (role === "admin") {
-    const isUserOnlyRoute = nextUrl.pathname === "/" || nextUrl.pathname === "/tickets/create" || nextUrl.pathname === "/waitlist";
-    if (isUserOnlyRoute) {
-      return NextResponse.redirect(new URL("/admin", nextUrl));
-    }
   }
 
   return NextResponse.next();

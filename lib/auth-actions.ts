@@ -81,7 +81,7 @@ export async function loginUser(prevState: unknown, formData: FormData) {
     await signIn("credentials", {
       name,
       password,
-      redirectTo: "/",
+      redirectTo: "/dashboard",
     });
   } catch (error) {
     if (error instanceof AuthError) {
@@ -131,5 +131,5 @@ export async function loginAdmin(prevState: unknown, formData: FormData) {
 }
 
 export async function logout() {
-  await signOut({ redirectTo: "/login" });
+  await signOut({ redirectTo: "/" });
 }
