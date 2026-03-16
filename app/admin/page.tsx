@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { type Ticket } from "@/app/tickets/data";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trash2, Calendar, User, Search, RefreshCw, MessageSquare, Loader2 } from "lucide-react";
@@ -11,8 +11,12 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { toast } from "sonner";
 
+interface AdminTicket extends Ticket {
+  department?: string;
+}
+
 export default function AdminDashboard() {
-  const [ticketList, setTicketList] = useState<Ticket[]>([]);
+  const [ticketList, setTicketList] = useState<AdminTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -126,7 +130,7 @@ export default function AdminDashboard() {
                           {ticket.name}
                         </span>
                         <span className="flex items-center gap-1 bg-primary/10 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-primary">
-                          {(ticket as any).department || "General"}
+                          {ticket.department || "General"}
                         </span>
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5" />

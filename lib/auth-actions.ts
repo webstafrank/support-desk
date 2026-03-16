@@ -6,22 +6,29 @@ import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 
-const DEFAULT_ADMIN = { name: "admin", password: "998877", department: "IT", role: "admin" };
+// Initial admin configuration from environment variables
+const ADMIN_NAME = process.env.ADMIN_NAME || "admin";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 async function ensureAdmin() {
+  if (!ADMIN_PASSWORD) {
+    console.warn("ADMIN_PASSWORD not set. Initial admin creation skipped.");
+    return;
+  }
+
   try {
     const admin = await prisma.user.findUnique({
-      where: { name: DEFAULT_ADMIN.name },
+      where: { name: ADMIN_NAME },
     });
 
     if (!admin) {
       console.log("Seeding default admin user...");
-      const hashedPassword = await bcrypt.hash(DEFAULT_ADMIN.password, 10);
+      const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
       await prisma.user.create({
         data: {
-          name: DEFAULT_ADMIN.name,
+          name: ADMIN_NAME,
           hashedPassword: hashedPassword,
-          department: DEFAULT_ADMIN.department,
+          department: "IT",
           role: "admin",
         },
       });
@@ -29,7 +36,6 @@ async function ensureAdmin() {
     }
   } catch (err) {
     console.error("Critical error ensuring admin user exists:", err);
-    // Rethrow to let the caller handle it if necessary, but here we'll just log
   }
 }
 

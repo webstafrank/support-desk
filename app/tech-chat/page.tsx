@@ -10,7 +10,7 @@ export default async function TechChatPage() {
   }
 
   const name = session.user.name || "User";
-  const department = (session.user as any).department || "General";
+  const department = session.user.department || "General";
 
   return <ChatClient initialUserName={name} department={department} />;
 }

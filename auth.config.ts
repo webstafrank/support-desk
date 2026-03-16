@@ -11,9 +11,14 @@ export default {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isPublicRoute = ["/", "/login", "/signup"].includes(nextUrl.pathname);
+      const isAdminRoute = nextUrl.pathname.startsWith("/admin");
       
       if (isPublicRoute) {
         return true;
+      }
+      
+      if (isAdminRoute) {
+        return isLoggedIn && auth?.user?.role === "admin";
       }
       
       return isLoggedIn;

@@ -3,9 +3,9 @@ services:
     image: postgres:15-alpine
     restart: always
     environment:
-      POSTGRES_USER: ksauser
-      POSTGRES_PASSWORD: ksapassword
-      POSTGRES_DB: ksadb
+      POSTGRES_USER: ${POSTGRES_USER:-ksauser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ksapassword}
+      POSTGRES_DB: ${POSTGRES_DB:-ksadb}
     ports:
       - "5432:5432"
     volumes:
@@ -23,7 +23,7 @@ services:
       target: builder
     command: npx prisma db push
     environment:
-      DATABASE_URL: "postgresql://ksauser:ksapassword@db:5432/ksadb"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-ksauser}:${POSTGRES_PASSWORD:-ksapassword}@db:5432/${POSTGRES_DB:-ksadb}"
     depends_on:
       db:
         condition: service_healthy
@@ -35,10 +35,10 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: "postgresql://ksauser:ksapassword@db:5432/ksadb"
-      NEXTAUTH_SECRET: "your-secret-here"
-      NEXTAUTH_URL: "http://localhost:3000"
-      GEMINI_API_KEY: "${GEMINI_API_KEY}"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-ksauser}:${POSTGRES_PASSWORD:-ksapassword}@db:5432/${POSTGRES_DB:-ksadb}"
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     depends_on:
       db:
         condition: service_healthy

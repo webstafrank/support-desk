@@ -28,12 +28,12 @@ export const {
         const inputPassword = credentials.password as string;
         let passwordsMatch = false;
 
-        // Try bcrypt first
+        // Verify password using bcrypt
         try {
           passwordsMatch = await bcrypt.compare(inputPassword, user.hashedPassword);
         } catch (e) {
-          // Fallback to plain text comparison for legacy users
-          passwordsMatch = inputPassword === user.hashedPassword;
+          console.error("Bcrypt comparison error:", e);
+          return null;
         }
 
         if (passwordsMatch) return user;
@@ -45,10 +45,10 @@ export const {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role;
+        token.role = user.role;
         token.name = user.name;
         token.id = user.id;
-        token.department = (user as any).department;
+        token.department = user.department;
       }
       return token;
     },
@@ -60,11 +60,11 @@ export const {
         session.user.role = token.role as string;
       }
       if (token.department && session.user) {
-        (session.user as any).department = token.department as string;
+        session.user.department = token.department as string;
       }
       return session;
     },
     ...authConfig.callbacks,
   },
-  ...authConfig,
+  pages: authConfig.pages,
 });

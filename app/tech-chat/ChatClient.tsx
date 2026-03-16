@@ -64,7 +64,7 @@ export default function ChatClient({ initialUserName, department }: ChatClientPr
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages.length]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +90,7 @@ export default function ChatClient({ initialUserName, department }: ChatClientPr
       } else {
         toast.error("Failed to send message");
       }
-    } catch (err) {
+    } catch {
       toast.error("An error occurred while sending");
     } finally {
       setSending(false);

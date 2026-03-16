@@ -77,7 +77,14 @@ const TabsContext = React.createContext<{
   onValueChange?: (value: string) => void
 }>({})
 
-const TabsRoot = ({ value, onValueChange, children, className }: any) => {
+interface TabsRootProps {
+  value?: string
+  onValueChange?: (value: string) => void
+  children: React.ReactNode
+  className?: string
+}
+
+const TabsRoot = ({ value, onValueChange, children, className }: TabsRootProps) => {
   return (
     <TabsContext.Provider value={{ value, onValueChange }}>
       <div className={cn("w-full", className)}>{children}</div>

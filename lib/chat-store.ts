@@ -46,7 +46,13 @@ class ChatStore {
           department: true,
         }
       });
-      return messages;
+      return messages
+        .filter(m => m.chatId !== null)
+        .map(m => ({
+          chatId: m.chatId as string,
+          senderName: m.senderName,
+          department: m.department || undefined,
+        }));
     } catch (error) {
       console.error("Error fetching chat sessions:", error);
       return [];

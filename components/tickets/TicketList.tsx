@@ -3,7 +3,6 @@
 import useSWR from "swr";
 import { type Ticket } from "@/app/tickets/data";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import Link from "next/link";
 import TicketStatus from "./TicketStatus";
 import { Badge } from "../ui/badge";
 import { Loader2 } from "lucide-react";

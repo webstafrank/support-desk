@@ -23,7 +23,7 @@ export async function createTicket(values: z.infer<typeof formSchema>) {
   // Validate data
   const validatedFields = formSchema.parse(values);
   const session = await auth();
-  const department = (session?.user as any)?.department;
+  const department = session?.user?.department;
   
   try {
     const newTicket = await ticketStore.addTicket({

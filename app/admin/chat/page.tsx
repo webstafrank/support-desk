@@ -5,7 +5,7 @@ import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquare, Send, User, ShieldCheck, Loader2, ChevronLeft, Search } from "lucide-react";
+import { MessageSquare, Send, User, ShieldCheck, Loader2, ChevronLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { type ChatMessage } from "@/lib/chat-store";
 import { cn } from "@/lib/utils";
@@ -26,7 +26,7 @@ export default function AdminChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Fetch active chat sessions
-  const { data: sessionsData, mutate: mutateSessions } = useSWR("/api/chat?type=sessions", fetcher, {
+  const { data: sessionsData } = useSWR("/api/chat?type=sessions", fetcher, {
     refreshInterval: 5000,
   });
 
@@ -44,7 +44,7 @@ export default function AdminChatPage() {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages.length]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +69,7 @@ export default function AdminChatPage() {
       } else {
         toast.error("Failed to send message");
       }
-    } catch (err) {
+    } catch {
       toast.error("An error occurred while sending");
     } finally {
       setSending(false);

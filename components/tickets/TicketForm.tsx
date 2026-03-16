@@ -12,7 +12,6 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import {
   Select,
@@ -91,7 +90,7 @@ export default function TicketForm({ id, defaultName = "" }: { id?: string; defa
           toast.error(result.message);
           setIsSubmitting(false);
         }
-      } catch (error) {
+      } catch {
         toast.error("Something went wrong");
         setIsSubmitting(false);
       }

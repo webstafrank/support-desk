@@ -3,6 +3,7 @@ export type Ticket = {
   name: string;
   subject: string;
   problemDescription: string;
+  department?: string;
   status: "open" | "closed" | "in progress";
   priority: "low" | "medium" | "high";
   createdAt: Date;
