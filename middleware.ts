@@ -20,8 +20,8 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  // 2. Redirect logged-in users away from /login and /signup
-  const isAuthPage = ["/login", "/signup"].includes(nextUrl.pathname);
+  // 2. Redirect logged-in users away from auth pages (home, login, signup)
+  const isAuthPage = ["/", "/login", "/signup"].includes(nextUrl.pathname);
   if (isLoggedIn) {
     if (isAuthPage) {
        return NextResponse.redirect(
