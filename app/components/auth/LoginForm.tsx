@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { loginUser, loginAdmin } from "@/lib/auth-actions";
+import { login } from "@/lib/auth-actions";
 import Link from "next/link";
 import { ShieldCheck, User as UserIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -21,10 +21,7 @@ import { useSearchParams } from "next/navigation";
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [state, formAction, isPending] = useActionState(
-    isAdmin ? loginAdmin : loginUser,
-    null
-  );
+  const [state, formAction, isPending] = useActionState(login, null);
 
   useEffect(() => {
     if (state?.error) {
@@ -41,6 +38,7 @@ export default function LoginForm() {
       <div className="flex bg-muted p-1 rounded-lg">
         <Button
           variant={!isAdmin ? "default" : "ghost"}
+          type="button"
           className="flex-1 gap-2"
           onClick={() => { setIsAdmin(false); }}
           disabled={isPending}
@@ -50,6 +48,7 @@ export default function LoginForm() {
         </Button>
         <Button
           variant={isAdmin ? "default" : "ghost"}
+          type="button"
           className="flex-1 gap-2"
           onClick={() => { setIsAdmin(true); }}
           disabled={isPending}
@@ -69,6 +68,7 @@ export default function LoginForm() {
           </CardDescription>
         </CardHeader>
         <form action={formAction}>
+          <input type="hidden" name="role" value={isAdmin ? "admin" : "user"} />
           <CardContent className="grid gap-4">
             {state?.error && <div className="text-destructive text-sm font-medium">{state.error}</div>}
             <div className="grid gap-2">

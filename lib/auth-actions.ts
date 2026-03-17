@@ -48,6 +48,7 @@ export async function signupUser(prevState: unknown, formData: FormData) {
     return { error: "All fields are required" };
   }
 
+  let success = false;
   try {
     const existingUser = await prisma.user.findUnique({
       where: { name },
@@ -67,61 +68,40 @@ export async function signupUser(prevState: unknown, formData: FormData) {
         role: "user",
       },
     });
+    success = true;
   } catch (err) {
     console.error("Signup exception:", err);
     return { error: "Database error. Please try again later." };
   }
 
-  redirect("/login?signup=success");
+  if (success) {
+    redirect("/login?signup=success");
+  }
 }
 
-export async function loginUser(prevState: unknown, formData: FormData) {
+export async function login(prevState: unknown, formData: FormData) {
   const name = formData.get("name")?.toString();
   const password = formData.get("password")?.toString();
+  const role = formData.get("role")?.toString() || "user";
 
   if (!name || !password) {
     return { error: "Name and password are required" };
   }
 
-  try {
-    await signIn("credentials", {
-      name,
-      password,
-      redirectTo: "/dashboard",
-    });
-  } catch (error) {
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case "CredentialsSignin":
-          return { error: "Invalid credentials." };
-        default:
-          return { error: "Something went wrong." };
-      }
-    }
-    throw error;
-  }
-}
-
-export async function loginAdmin(prevState: unknown, formData: FormData) {
-  await ensureAdmin();
-  const name = formData.get("name")?.toString();
-  const password = formData.get("password")?.toString();
-
-  if (!name || !password) {
-    return { error: "Name and password are required" };
-  }
-
-  try {
-    // Check if user is admin before signing in (optional, but good for UX)
+  if (role === "admin") {
+    await ensureAdmin();
+    // Pre-check for admin role
     const user = await prisma.user.findUnique({ where: { name } });
     if (user && user.role !== "admin") {
       return { error: "Access denied. Admin role required." };
     }
+  }
 
+  try {
     await signIn("credentials", {
       name,
       password,
-      redirectTo: "/admin",
+      redirectTo: role === "admin" ? "/admin" : "/dashboard",
     });
   } catch (error) {
     if (error instanceof AuthError) {
@@ -134,6 +114,14 @@ export async function loginAdmin(prevState: unknown, formData: FormData) {
     }
     throw error;
   }
+}
+
+export async function loginUser(prevState: unknown, formData: FormData) {
+  return login(prevState, formData);
+}
+
+export async function loginAdmin(prevState: unknown, formData: FormData) {
+  return login(prevState, formData);
 }
 
 export async function logout() {

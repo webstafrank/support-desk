@@ -11,6 +11,7 @@ export const {
   signOut,
 } = NextAuth({
   session: { strategy: "jwt" },
+  debug: process.env.NODE_ENV === "development",
   providers: [
     ...authConfig.providers,
     Credentials({

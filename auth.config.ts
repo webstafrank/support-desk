@@ -11,9 +11,14 @@ export default {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isPublicRoute = ["/", "/login", "/signup"].includes(nextUrl.pathname);
+      const isApiPublicRoute = 
+        nextUrl.pathname.startsWith("/api/chat") || 
+        nextUrl.pathname.startsWith("/api/ai") ||
+        nextUrl.pathname.startsWith("/api/tickets") ||
+        nextUrl.pathname.startsWith("/api/auth");
       const isAdminRoute = nextUrl.pathname.startsWith("/admin");
       
-      if (isPublicRoute) {
+      if (isPublicRoute || isApiPublicRoute) {
         return true;
       }
       
