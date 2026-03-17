@@ -5,7 +5,7 @@ import type { NextAuthConfig } from "next-auth";
 export default {
   providers: [], // Providers are added in the full auth.ts
   pages: {
-    signIn: "/",
+    signIn: "/login",
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
