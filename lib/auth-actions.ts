@@ -23,7 +23,7 @@ async function ensureAdmin() {
 
     if (!admin) {
       console.log("Seeding default admin user...");
-      const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
+      const hashedPassword = bcrypt.hashSync(ADMIN_PASSWORD, 10);
       await prisma.user.create({
         data: {
           name: ADMIN_NAME,
@@ -58,7 +58,7 @@ export async function signupUser(prevState: unknown, formData: FormData) {
       return { error: "Username already taken" };
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = bcrypt.hashSync(password, 10);
 
     await prisma.user.create({
       data: {

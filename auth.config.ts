@@ -8,6 +8,27 @@ export default {
     signIn: "/",
   },
   callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+        token.name = user.name;
+        token.id = user.id;
+        token.department = user.department;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token.sub && session.user) {
+        session.user.id = token.sub;
+      }
+      if (token.role && session.user) {
+        session.user.role = token.role as string;
+      }
+      if (token.department && session.user) {
+        session.user.department = token.department as string;
+      }
+      return session;
+    },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isPublicRoute = ["/", "/login", "/signup"].includes(nextUrl.pathname);

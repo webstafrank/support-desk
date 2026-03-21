@@ -29,7 +29,7 @@ export const {
 
         // Verify password using bcrypt
         try {
-          passwordsMatch = await bcrypt.compare(inputPassword, user.hashedPassword);
+          passwordsMatch = bcrypt.compareSync(inputPassword, user.hashedPassword);
         } catch (e) {
           console.error("Bcrypt comparison error:", e);
           return null;
@@ -41,28 +41,8 @@ export const {
       },
     }),
   ],
+  ...authConfig,
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role;
-        token.name = user.name;
-        token.id = user.id;
-        token.department = user.department;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token.sub && session.user) {
-        session.user.id = token.sub;
-      }
-      if (token.role && session.user) {
-        session.user.role = token.role as string;
-      }
-      if (token.department && session.user) {
-        session.user.department = token.department as string;
-      }
-      return session;
-    },
     ...authConfig.callbacks,
   },
   pages: authConfig.pages,
