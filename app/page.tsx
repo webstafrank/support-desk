@@ -1,22 +1,8 @@
-import { auth } from "@/auth";
 import AuthTabs from "@/app/components/auth/AuthTabs";
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import { Bot } from "lucide-react";
 
 export default async function Home() {
-  const session = await auth();
-  const role = session?.user?.role;
-
-  // If already logged in, redirect to the appropriate dashboard
-  if (session) {
-    if (role === "admin") {
-      redirect("/admin");
-    } else {
-      redirect("/dashboard");
-    }
-  }
-
   return (
     <main className="container flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] mx-auto px-4 gap-8 py-10">
       <div className="max-w-3xl space-y-4 text-center animate-in fade-in slide-in-from-top-4 duration-1000">

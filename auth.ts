@@ -10,10 +10,10 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
+  ...authConfig,
   session: { strategy: "jwt" },
   debug: process.env.NODE_ENV === "development",
   providers: [
-    ...authConfig.providers,
     Credentials({
       async authorize(credentials) {
         if (!credentials?.name || !credentials?.password) return null;
@@ -29,7 +29,10 @@ export const {
 
         // Verify password using bcrypt
         try {
-          passwordsMatch = bcrypt.compareSync(inputPassword, user.hashedPassword);
+          passwordsMatch = bcrypt.compareSync(
+            inputPassword,
+            user.hashedPassword
+          );
         } catch (e) {
           console.error("Bcrypt comparison error:", e);
           return null;
@@ -41,9 +44,4 @@ export const {
       },
     }),
   ],
-  ...authConfig,
-  callbacks: {
-    ...authConfig.callbacks,
-  },
-  pages: authConfig.pages,
 });

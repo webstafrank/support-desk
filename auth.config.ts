@@ -39,7 +39,12 @@ export default {
         nextUrl.pathname.startsWith("/api/auth");
       const isAdminRoute = nextUrl.pathname.startsWith("/admin");
       
-      if (isPublicRoute || isApiPublicRoute) {
+      if (isPublicRoute) {
+        if (isLoggedIn) {
+          const { role } = auth.user;
+          const redirectUrl = role === "admin" ? "/admin" : "/dashboard";
+          return Response.redirect(new URL(redirectUrl, nextUrl));
+        }
         return true;
       }
       
@@ -47,7 +52,11 @@ export default {
         return isLoggedIn && auth?.user?.role === "admin";
       }
       
-      return isLoggedIn;
+      if (!isLoggedIn && !isPublicRoute && !isApiPublicRoute) {
+        return Response.redirect(new URL("/", nextUrl));
+      }
+      
+      return true;
     },
   },
 } satisfies NextAuthConfig;
