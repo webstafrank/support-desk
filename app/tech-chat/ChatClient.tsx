@@ -55,7 +55,13 @@ export default function ChatClient({ initialUserName, department }: ChatClientPr
   const { data, error, mutate } = useSWR(
     chatId ? `/api/chat?chatId=${chatId}` : null, 
     fetcher, 
-    { refreshInterval: 2000 }
+    {
+      refreshInterval: 6000,
+      dedupingInterval: 4000,
+      revalidateOnFocus: false,
+      revalidateIfStale: false,
+      refreshWhenHidden: false,
+    }
   );
 
   const messages: ChatMessage[] = data?.messages || [];

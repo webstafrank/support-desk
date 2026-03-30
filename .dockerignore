@@ -8,3 +8,9 @@ pnpm-debug.log*
 yarn-error.log*
 .next
 .git
+.env.local
+.env
+coverage
+backup.sql
+supabase
+tsconfig.tsbuildinfo

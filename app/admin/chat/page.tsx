@@ -27,14 +27,24 @@ export default function AdminChatPage() {
 
   // Fetch active chat sessions
   const { data: sessionsData } = useSWR("/api/chat?type=sessions", fetcher, {
-    refreshInterval: 5000,
+    refreshInterval: 15000,
+    dedupingInterval: 10000,
+    revalidateOnFocus: false,
+    revalidateIfStale: false,
+    refreshWhenHidden: false,
   });
 
   // Fetch messages for the selected chat
   const { data: messagesData, error: messagesError, mutate: mutateMessages } = useSWR(
     selectedChatId ? `/api/chat?chatId=${selectedChatId}` : null,
     fetcher,
-    { refreshInterval: 2000 }
+    {
+      refreshInterval: 5000,
+      dedupingInterval: 4000,
+      revalidateOnFocus: false,
+      revalidateIfStale: false,
+      refreshWhenHidden: false,
+    }
   );
 
   const sessions: ChatSession[] = sessionsData?.sessions || [];

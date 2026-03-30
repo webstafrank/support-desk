@@ -15,7 +15,11 @@ export default function TicketList({
   statusFilter?: "all" | "pending" | "closed" 
 }) {
   const { data, error, isLoading } = useSWR("/api/tickets", fetcher, {
-    refreshInterval: 3000, 
+    refreshInterval: 15000,
+    dedupingInterval: 10000,
+    revalidateOnFocus: false,
+    revalidateIfStale: false,
+    refreshWhenHidden: false,
   });
 
   if (isLoading) {

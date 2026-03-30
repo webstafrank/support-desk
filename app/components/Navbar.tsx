@@ -1,33 +1,81 @@
+"use client";
+
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { buttonVariants, Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { auth } from "@/auth";
-import { Button } from "@/components/ui/button";
 import { LogOut, User, ShieldCheck } from "lucide-react";
 import { logout } from "@/lib/auth-actions";
 
-export default async function Navbar() {
-  const session = await auth();
+type NavbarSession = {
+  user?: {
+    name?: string | null;
+    role?: string;
+  };
+} | null;
+
+const sessionFetcher = async (): Promise<NavbarSession> => {
+  const response = await fetch("/api/auth/session", {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return response.json();
+};
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const [session, setSession] = useState<NavbarSession>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    sessionFetcher()
+      .then((data) => {
+        if (active) {
+          setSession(data);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setSession(null);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setReady(true);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [pathname]);
+
   const role = session?.user?.role;
   const name = session?.user?.name;
+  const homeHref = role === "admin" ? "/admin" : role === "user" ? "/dashboard" : "/";
 
   return (
     <Card className="p-4 mb-4 shadow-sm border-none rounded-none md:rounded-lg">
       <nav className="container flex items-center justify-between mx-auto">
         <div className="flex items-center gap-6">
-          <Link href={role === "admin" ? "/admin" : role === "user" ? "/dashboard" : "/"} className="font-bold text-xl tracking-tight text-primary">
+          <Link href={homeHref} className="font-bold text-xl tracking-tight text-primary">
             KSA IT
           </Link>
-          
+
           <div className="flex items-center gap-2">
-            <Link 
-              href={role === "admin" ? "/admin" : role === "user" ? "/dashboard" : "/"} 
-              className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-            >
+            <Link href={homeHref} className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
               Home
             </Link>
-            
+
             {role === "user" && (
               <>
                 <Link href="/tickets/create" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
@@ -53,7 +101,9 @@ export default async function Navbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          {role ? (
+          {!ready ? (
+            <div className="h-9 w-36 rounded-full bg-muted animate-pulse" />
+          ) : role ? (
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5 px-3 py-1 bg-muted rounded-full text-xs font-medium">
                 {role === "admin" ? (

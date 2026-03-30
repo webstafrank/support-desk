@@ -4,12 +4,11 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import TicketForm from "@/components/tickets/TicketForm";
-
-import { cookies } from "next/headers";
+import { auth } from "@/auth";
 
 export default async function Page() {
-  const cookieStore = await cookies();
-  const userName = cookieStore.get("it_support_name")?.value || "";
+  const session = await auth();
+  const userName = session?.user?.name || "";
 
   return (
     <main className="container flex flex-col items-center">
